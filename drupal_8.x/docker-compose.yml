@@ -1,0 +1,41 @@
+################################################################################
+# Docker Compose Drupal 9 onwards.
+################################################################################
+version: '3'
+services:
+  php:
+    build: .
+    volumes:
+      - ${HOST_WEB_ROOT}:/var/www/html
+    links:
+      - mysql
+      - mailhog
+    env_file: .env
+    restart: unless-stopped
+    container_name: ${PROJECT_NAME}-php
+    ports:
+      - 80:80
+      - 443:443
+  mysql:
+    image: mysql:5.7-debian
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_ALLOW_EMPTY_PASSWORD=${MYSQL_ALLOW_EMPTY_PASSWORD}
+    ports:
+      - 3306:3306
+    volumes:
+      - ./db_data:/var/lib/mysql
+    command: tail -f /dev/null
+    env_file: .env
+    restart: unless-stopped
+    container_name: ${PROJECT_NAME}-mysql
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - 1025:1025
+      - 8025:8025
+volumes:
+  php-sock:
